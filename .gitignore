@@ -146,3 +146,7 @@ custom_template_*.json
 # OS
 .DS_Store
 Thumbs.db
+
+.history/
+.claude/
+output/

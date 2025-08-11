@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "基于区块拼接算法的游戏地图生成工具，参考暗黑破坏神2的地图生成机制"
 authors = ["Your Name <your.email@example.com>"]
 readme = "README.md"
-# packages = [{include = "mymapgentool", from = "."}]
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.8.1"
@@ -17,7 +17,7 @@ black = "^23.0.0"
 flake8 = "^6.0.0"
 
 [tool.poetry.scripts]
-demo = "demo:main"
+D2MapGenTool = "D2MapGenTool:main"
 editor = "interactive_editor:main"
 
 [build-system]

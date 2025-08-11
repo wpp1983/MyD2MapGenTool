@@ -1,0 +1,124 @@
+{
+  "templates": [
+    {
+      "name": "plain",
+      "description": "基础平原区块",
+      "terrain_pattern": "plain",
+      "edges": {
+        "north": "plain",
+        "south": "plain",
+        "east": "plain",
+        "west": "plain"
+      },
+      "weight": 3.0
+    },
+    {
+      "name": "forest",
+      "description": "基础森林区块",
+      "terrain_pattern": "forest",
+      "edges": {
+        "north": "forest",
+        "south": "forest",
+        "east": "forest",
+        "west": "forest"
+      },
+      "weight": 2.0
+    },
+    {
+      "name": "highland",
+      "description": "基础高地区块",
+      "terrain_pattern": "highland",
+      "edges": {
+        "north": "highland",
+        "south": "highland",
+        "east": "highland",
+        "west": "highland"
+      },
+      "weight": 1.5
+    },
+    {
+      "name": "river",
+      "description": "河流区块",
+      "terrain_pattern": "river",
+      "edges": {
+        "north": "river",
+        "south": "river",
+        "east": "river",
+        "west": "river"
+      },
+      "weight": 0.8
+    },
+    {
+      "name": "slope",
+      "description": "斜坡区块",
+      "terrain_pattern": "slope",
+      "edges": {
+        "north": "slope",
+        "south": "slope",
+        "east": "slope",
+        "west": "slope"
+      },
+      "weight": 1.0
+    },
+    {
+      "name": "cliff",
+      "description": "悬崖区块",
+      "terrain_pattern": "cliff",
+      "edges": {
+        "north": "cliff",
+        "south": "cliff",
+        "east": "cliff",
+        "west": "cliff"
+      },
+      "weight": 0.5
+    }
+  ],
+  "terrain_types": {
+    "plain": "平原",
+    "forest": "森林",
+    "highland": "高地",
+    "cliff": "悬崖",
+    "river": "河流",
+    "slope": "斜坡"
+  },
+  "terrain_colors": {
+    "plain": [0.4, 0.8, 0.2],
+    "forest": [0.1, 0.4, 0.1],
+    "highland": [0.8, 0.6, 0.4],
+    "cliff": [0.5, 0.5, 0.5],
+    "river": [0.2, 0.4, 0.8],
+    "slope": [0.6, 0.3, 0.15]
+  },
+  "edge_types": {
+    "plain": "plain_edge",
+    "forest": "forest_edge",
+    "highland": "highland_edge",
+    "cliff": "cliff_edge",
+    "river": "river_edge",
+    "slope": "slope_edge"
+  },
+  "edge_compatibility": [
+    ["plain", "forest"],
+    ["plain", "river"],
+    ["plain", "slope"],
+    ["highland", "slope"],
+    ["highland", "cliff"],
+    ["forest", "slope"],
+    ["forest", "cliff"]
+  ],
+  "debug": {
+    "show_template_names": false,
+    "show_grid_lines": true,
+    "export_debug_info": true
+  },
+  "ui": {
+    "enable_gui": true,
+    "auto_detect_environment": true,
+    "fallback_to_headless": true,
+    "default_map_size": {
+      "tile_width": 12,
+      "tile_height": 10
+    },
+    "headless_batch_seeds": [42, 123, 456]
+  }
+}
