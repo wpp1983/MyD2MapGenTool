@@ -105,16 +105,29 @@ class MapVisualizer:
         terrain_array = self.map_generator.to_array()
         
         # 使用统一的颜色定义
-        from terrain_types import TerrainCell
+        from terrain_types import TerrainCell, TerrainType
         terrain_color_map = TerrainCell.get_color_map()
         
-        color_map = {
-            0: terrain_color_map[TerrainType.RIVER],    # River - blue
-            1: terrain_color_map[TerrainType.FOREST],   # Forest - dark green
-            2: terrain_color_map[TerrainType.PLAIN],    # Plain - light green
-            3: terrain_color_map[TerrainType.CLIFF],    # Cliff - gray
-            4: terrain_color_map[TerrainType.HIGHLAND]  # Highland - brown
-        }
+        # 动态创建颜色映射
+        TerrainType.initialize_from_config()
+        terrain_types = TerrainType.get_all_types()
+        
+        color_map = {}
+        for i, terrain_str in enumerate(terrain_types):
+            # 直接使用字符串而不是转换后的类型
+            if terrain_str in ['plain', 'forest', 'highland', 'cliff', 'slope']:
+                # 使用预定义的颜色
+                color_defaults = {
+                    "plain": [0.4, 0.8, 0.2],     # 平原 - 浅绿色
+                    "forest": [0.1, 0.4, 0.1],    # 森林 - 深绿色
+                    "highland": [0.8, 0.6, 0.4],  # 高地 - 棕色
+                    "cliff": [0.5, 0.5, 0.5],     # 悬崖 - 灰色
+                    "slope": [0.6, 0.3, 0.15]     # 斜坡 - 褐色
+                }
+                color_map[i] = color_defaults.get(terrain_str, [0.5, 0.5, 0.5])
+            else:
+                # 默认颜色（灰色）
+                color_map[i] = [0.5, 0.5, 0.5]
         
         colored_map = np.zeros((terrain_array.shape[0], terrain_array.shape[1], 3))
         for terrain_value, color in color_map.items():
@@ -125,13 +138,14 @@ class MapVisualizer:
         
         self._draw_tile_grid()
         
-        legend_elements = [
-            patches.Patch(color=color_map[0], label='River'),
-            patches.Patch(color=color_map[1], label='Forest'),
-            patches.Patch(color=color_map[2], label='Plain'),
-            patches.Patch(color=color_map[3], label='Cliff'),
-            patches.Patch(color=color_map[4], label='Highland')
-        ]
+        # 动态生成图例
+        legend_elements = []
+        for i, terrain_str in enumerate(terrain_types):
+            if i in color_map:
+                # 将地形类型字符串首字母大写作为显示标签
+                label = terrain_str.capitalize()
+                legend_elements.append(patches.Patch(color=color_map[i], label=label))
+        
         self.ax.legend(handles=legend_elements, loc='upper right', bbox_to_anchor=(1.15, 1))
         
         self.ax.set_title(f'Generated Map (Seed: {self.current_seed})')
@@ -207,16 +221,29 @@ class MapVisualizer:
             
         terrain_array = self.map_generator.to_array()
         # 使用统一的颜色定义
-        from terrain_types import TerrainCell
+        from terrain_types import TerrainCell, TerrainType
         terrain_color_map = TerrainCell.get_color_map()
         
-        color_map = {
-            0: terrain_color_map[TerrainType.RIVER],
-            1: terrain_color_map[TerrainType.FOREST],
-            2: terrain_color_map[TerrainType.PLAIN],
-            3: terrain_color_map[TerrainType.CLIFF],
-            4: terrain_color_map[TerrainType.HIGHLAND]
-        }
+        # 动态创建颜色映射
+        TerrainType.initialize_from_config()
+        terrain_types = TerrainType.get_all_types()
+        
+        color_map = {}
+        for i, terrain_str in enumerate(terrain_types):
+            # 直接使用字符串而不是转换后的类型
+            if terrain_str in ['plain', 'forest', 'highland', 'cliff', 'slope']:
+                # 使用预定义的颜色
+                color_defaults = {
+                    "plain": [0.4, 0.8, 0.2],     # 平原 - 浅绿色
+                    "forest": [0.1, 0.4, 0.1],    # 森林 - 深绿色
+                    "highland": [0.8, 0.6, 0.4],  # 高地 - 棕色
+                    "cliff": [0.5, 0.5, 0.5],     # 悬崖 - 灰色
+                    "slope": [0.6, 0.3, 0.15]     # 斜坡 - 褐色
+                }
+                color_map[i] = color_defaults.get(terrain_str, [0.5, 0.5, 0.5])
+            else:
+                # 默认颜色（灰色）
+                color_map[i] = [0.5, 0.5, 0.5]
         
         colored_map = np.zeros((terrain_array.shape[0], terrain_array.shape[1], 3))
         for terrain_value, color in color_map.items():

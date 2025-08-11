@@ -7,7 +7,7 @@ from terrain_types import TerrainType
 class InteractiveMapEditor(MapVisualizer):
     def __init__(self, tile_width: int = 10, tile_height: int = 8):
         self.edit_mode = False
-        self.selected_terrain = TerrainType.PLAIN
+        self.selected_terrain_str = 'plain'  # 使用字符串而不是枚举
         
         super().__init__(tile_width, tile_height)
         self._setup_edit_ui()
@@ -22,7 +22,7 @@ class InteractiveMapEditor(MapVisualizer):
         self.btn_edit.on_clicked(self._toggle_edit_mode)
         
         ax_radio = plt.axes([0.88, 0.3, 0.1, 0.4])
-        terrain_labels = ['Plain', 'Forest', 'Highland', 'Cliff', 'River']
+        terrain_labels = ['Plain', 'Forest', 'Highland', 'Cliff', 'Slope']
         self.radio_terrain = RadioButtons(ax_radio, terrain_labels)
         self.radio_terrain.on_clicked(self._on_terrain_selected)
         
@@ -40,7 +40,7 @@ class InteractiveMapEditor(MapVisualizer):
         self.edit_mode = not self.edit_mode
         if self.edit_mode:
             self.btn_edit.label.set_text('Exit Edit')
-            self.ax.set_title(f'Edit Mode - Click to paint {self.selected_terrain.value}')
+            self.ax.set_title(f'Edit Mode - Click to paint {self.selected_terrain_str}')
         else:
             self.btn_edit.label.set_text('Edit Mode')
             self.ax.set_title(f'Generated Map (Seed: {self.current_seed})')
@@ -48,16 +48,16 @@ class InteractiveMapEditor(MapVisualizer):
     
     def _on_terrain_selected(self, label):
         terrain_map = {
-            'Plain': TerrainType.PLAIN,
-            'Forest': TerrainType.FOREST,
-            'Highland': TerrainType.HIGHLAND,
-            'Cliff': TerrainType.CLIFF,
-            'River': TerrainType.RIVER
+            'Plain': 'plain',
+            'Forest': 'forest',
+            'Highland': 'highland',
+            'Cliff': 'cliff',
+            'Slope': 'slope'
         }
-        self.selected_terrain = terrain_map[label]
+        self.selected_terrain_str = terrain_map[label]
         
         if self.edit_mode:
-            self.ax.set_title(f'Edit Mode - Click to paint {self.selected_terrain.value}')
+            self.ax.set_title(f'Edit Mode - Click to paint {self.selected_terrain_str}')
             self.fig.canvas.draw()
     
     def _on_click(self, event):
@@ -73,7 +73,7 @@ class InteractiveMapEditor(MapVisualizer):
         if 0 <= x < self.map_generator.width and 0 <= y < self.map_generator.height:
             cell = self.map_generator.get_cell(x, y)
             if cell:
-                cell.terrain_type = self.selected_terrain
+                cell.terrain_type = self.selected_terrain_str  # 现在使用字符串
                 self.edited_cells.add((x, y))
                 self._display_map()
     
@@ -99,7 +99,7 @@ class InteractiveMapEditor(MapVisualizer):
             row = []
             for x in range(min_x, max_x + 1):
                 cell = self.map_generator.get_cell(x, y)
-                row.append(cell.terrain_type.value if cell else 'plain')
+                row.append(cell.terrain_type if cell else 'plain')  # 现在是字符串
             template_data.append(row)
         
         template_dict = {
@@ -125,7 +125,7 @@ class InteractiveMapEditor(MapVisualizer):
                 self.ax.add_patch(circle)
         
         if self.edit_mode:
-            instruction_text = f"Edit Mode: Click to paint {self.selected_terrain.value}\nEdited cells: {len(self.edited_cells)}"
+            instruction_text = f"Edit Mode: Click to paint {self.selected_terrain_str}\nEdited cells: {len(self.edited_cells)}"
             self.ax.text(0.02, 0.98, instruction_text, transform=self.ax.transAxes, 
                         verticalalignment='top', bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.8))
 

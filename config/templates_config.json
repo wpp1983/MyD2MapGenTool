@@ -37,18 +37,6 @@
       "weight": 1.5
     },
     {
-      "name": "river",
-      "description": "河流区块",
-      "terrain_pattern": "river",
-      "edges": {
-        "north": "river",
-        "south": "river",
-        "east": "river",
-        "west": "river"
-      },
-      "weight": 0.8
-    },
-    {
       "name": "slope",
       "description": "斜坡区块",
       "terrain_pattern": "slope",
@@ -78,7 +66,6 @@
     "forest": "森林",
     "highland": "高地",
     "cliff": "悬崖",
-    "river": "河流",
     "slope": "斜坡"
   },
   "terrain_colors": {
@@ -86,7 +73,6 @@
     "forest": [0.1, 0.4, 0.1],
     "highland": [0.8, 0.6, 0.4],
     "cliff": [0.5, 0.5, 0.5],
-    "river": [0.2, 0.4, 0.8],
     "slope": [0.6, 0.3, 0.15]
   },
   "edge_types": {
@@ -94,17 +80,16 @@
     "forest": "forest_edge",
     "highland": "highland_edge",
     "cliff": "cliff_edge",
-    "river": "river_edge",
     "slope": "slope_edge"
   },
   "edge_compatibility": [
     ["plain", "forest"],
-    ["plain", "river"],
-    ["plain", "slope"],
-    ["plain", "cliff"],
+    ["highland", "plain"],
+    ["slope", "plain"],
     ["highland", "slope"],
-    ["highland", "cliff"],
     ["forest", "slope"],
+    ["plain", "cliff"],
+    ["highland", "cliff"],
     ["forest", "cliff"]
   ],
   "generation_rules": {

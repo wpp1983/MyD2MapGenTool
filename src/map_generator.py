@@ -26,10 +26,22 @@ class TileBasedMap:
     
     def _initialize_grid(self):
         self.grid = []  # 清空现有网格
+        
+        # 确保地形类型已初始化
+        TerrainType.initialize_from_config()
+        
+        # 获取默认地形类型（通常是平原）
+        try:
+            default_terrain = TerrainType.from_string("plain")
+        except ValueError:
+            # 如果没有平原，使用第一个可用的地形类型
+            terrain_types = TerrainType.get_all_types()
+            default_terrain = TerrainType.from_string(terrain_types[0]) if terrain_types else "plain"
+        
         for y in range(self.height):
             row = []
             for x in range(self.width):
-                cell = TerrainCell(x, y, TerrainType.PLAIN)
+                cell = TerrainCell(x, y, default_terrain)
                 row.append(cell)
             self.grid.append(row)
     
@@ -271,7 +283,8 @@ class TileBasedMap:
         for py in range(self.tile_size):
             for px in range(self.tile_size):
                 terrain_value = template.terrain_pattern[py, px]
-                terrain_type = TerrainType(terrain_value)
+                # terrain_value现在是字符串，直接使用
+                terrain_type = terrain_value
                 
                 grid_x = start_x + px
                 grid_y = start_y + py
@@ -285,16 +298,19 @@ class TileBasedMap:
         return None
     
     def to_array(self) -> np.ndarray:
-        terrain_map = {
-            TerrainType.HIGHLAND: 4,
-            TerrainType.CLIFF: 3,
-            TerrainType.PLAIN: 2,
-            TerrainType.FOREST: 1,
-            TerrainType.RIVER: 0
-        }
+        # 确保地形类型已初始化
+        TerrainType.initialize_from_config()
+        
+        # 动态创建地形映射 - 使用字符串作为键
+        terrain_map = {}
+        terrain_types = TerrainType.get_all_types()
+        
+        # 为每种地形类型分配一个数值，使用原始字符串而不是转换后的
+        for i, terrain_str in enumerate(terrain_types):
+            terrain_map[terrain_str] = i
         
         result = np.zeros((self.height, self.width), dtype=int)
         for y in range(self.height):
             for x in range(self.width):
-                result[y, x] = terrain_map[self.grid[y][x].terrain_type]
+                result[y, x] = terrain_map.get(self.grid[y][x].terrain_type, 0)
         return result

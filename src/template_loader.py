@@ -26,86 +26,53 @@ class TemplateLoader:
         except json.JSONDecodeError as e:
             raise ValueError(f"配置文件格式错误: {e}")
     
-    def _terrain_str_to_enum(self, terrain_str: str) -> TerrainType:
-        """将字符串转换为地形类型枚举"""
-        terrain_map = {
-            "plain": TerrainType.PLAIN,
-            "forest": TerrainType.FOREST,
-            "highland": TerrainType.HIGHLAND,
-            "cliff": TerrainType.CLIFF,
-            "river": TerrainType.RIVER,
-            "slope": TerrainType.SLOPE
-        }
-        if terrain_str not in terrain_map:
+    def _terrain_str_to_enum(self, terrain_str: str) -> str:
+        """将字符串转换为地形类型"""
+        # 确保地形类型已初始化
+        TerrainType.initialize_from_config()
+        
+        try:
+            return TerrainType.from_string(terrain_str)
+        except ValueError:
             raise ValueError(f"未知的地形类型: {terrain_str}")
-        return terrain_map[terrain_str]
     
-    def _edge_str_to_enum(self, edge_str: str) -> EdgeType:
-        """将字符串转换为边缘类型枚举"""
-        edge_map = {
-            "plain": EdgeType.PLAIN_EDGE,
-            "forest": EdgeType.FOREST_EDGE,
-            "highland": EdgeType.HIGHLAND_EDGE,
-            "cliff": EdgeType.CLIFF_EDGE,
-            "river": EdgeType.RIVER_EDGE,
-            "slope": EdgeType.SLOPE_EDGE
-        }
-        if edge_str not in edge_map:
+    def _edge_str_to_enum(self, edge_str: str) -> str:
+        """将字符串转换为边缘类型"""
+        # 确保边缘类型已初始化
+        EdgeType.initialize_from_config()
+        
+        try:
+            return EdgeType.from_string(edge_str)
+        except ValueError:
             raise ValueError(f"未知的边缘类型: {edge_str}")
-        return edge_map[edge_str]
     
     def _create_terrain_pattern(self, pattern_config: Any, tile_size: int) -> np.ndarray:
         """根据配置创建地形模式"""
         if isinstance(pattern_config, str):
             # 单一地形类型
-            terrain_type = self._terrain_str_to_enum(pattern_config)
-            return np.full((tile_size, tile_size), terrain_type.value, dtype='U8')
+            terrain_type_str = self._terrain_str_to_enum(pattern_config)
+            # 现在terrain_type_str是字符串，直接使用原始字符串
+            return np.full((tile_size, tile_size), pattern_config, dtype='U8')
         
         elif isinstance(pattern_config, dict):
             pattern_type = pattern_config.get("type")
             
             if pattern_type == "split_horizontal":
                 # 水平分割
-                top_terrain = self._terrain_str_to_enum(pattern_config["top"])
-                bottom_terrain = self._terrain_str_to_enum(pattern_config["bottom"])
+                top_terrain_str = pattern_config["top"]
+                bottom_terrain_str = pattern_config["bottom"]
                 
-                pattern = np.full((tile_size, tile_size), bottom_terrain.value, dtype='U8')
-                pattern[:tile_size//2, :] = top_terrain.value
+                pattern = np.full((tile_size, tile_size), bottom_terrain_str, dtype='U8')
+                pattern[:tile_size//2, :] = top_terrain_str
                 return pattern
             
             elif pattern_type == "split_vertical":
                 # 垂直分割
-                left_terrain = self._terrain_str_to_enum(pattern_config["left"])
-                right_terrain = self._terrain_str_to_enum(pattern_config["right"])
+                left_terrain_str = pattern_config["left"]
+                right_terrain_str = pattern_config["right"]
                 
-                pattern = np.full((tile_size, tile_size), right_terrain.value, dtype='U8')
-                pattern[:, :tile_size//2] = left_terrain.value
-                return pattern
-            
-            elif pattern_type == "river_horizontal":
-                # 水平河流（河流穿过平原）
-                base_terrain = self._terrain_str_to_enum(pattern_config.get("base", "plain"))
-                river_terrain = self._terrain_str_to_enum("river")
-                
-                pattern = np.full((tile_size, tile_size), base_terrain.value, dtype='U8')
-                mid = tile_size // 2
-                river_width = pattern_config.get("width", 3)
-                start = mid - river_width // 2
-                end = start + river_width
-                pattern[start:end, :] = river_terrain.value
-                return pattern
-            
-            elif pattern_type == "river_vertical":
-                # 垂直河流（河流穿过平原）
-                base_terrain = self._terrain_str_to_enum(pattern_config.get("base", "plain"))
-                river_terrain = self._terrain_str_to_enum("river")
-                
-                pattern = np.full((tile_size, tile_size), base_terrain.value, dtype='U8')
-                mid = tile_size // 2
-                river_width = pattern_config.get("width", 3)
-                start = mid - river_width // 2
-                end = start + river_width
-                pattern[:, start:end] = river_terrain.value
+                pattern = np.full((tile_size, tile_size), right_terrain_str, dtype='U8')
+                pattern[:, :tile_size//2] = left_terrain_str
                 return pattern
             
             else:

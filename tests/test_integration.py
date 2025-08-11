@@ -35,7 +35,7 @@ class TestIntegration:
             for x in range(4):
                 tile = map_gen.tiles[y][x]
                 assert tile is not None, f"位置({x},{y})应该有地块"
-                assert tile.name in ["plain", "forest", "highland", "river", "slope", "cliff"], f"地块类型无效: {tile.name}"
+                assert tile.name in ["plain", "forest", "highland", "slope", "cliff"], f"地块类型无效: {tile.name}"
     
     def test_terrain_cell_grid(self):
         """测试地形网格"""
@@ -51,10 +51,14 @@ class TestIntegration:
         assert map_gen.height == expected_size, f"地图高度应该是{expected_size}"
         
         # 验证网格中的地形类型
+        TerrainType.initialize_from_config()
+        valid_terrain_types = TerrainType.get_all_types()
+        
         for y in range(expected_size):
             for x in range(expected_size):
                 cell = map_gen.grid[y][x]
-                assert isinstance(cell.terrain_type, TerrainType), f"位置({x},{y})应该有有效的地形类型"
+                assert isinstance(cell.terrain_type, str), f"位置({x},{y})的地形类型应该是字符串"
+                assert cell.terrain_type in valid_terrain_types, f"位置({x},{y})应该有有效的地形类型: {cell.terrain_type}"
     
     def test_map_to_array_conversion(self):
         """测试地图转数组功能"""

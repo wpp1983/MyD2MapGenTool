@@ -66,7 +66,7 @@ def print_banner(config: AppConfig):
     print()
     print("特性:")
     print("• 基于区块的地形生成算法")
-    print("• 支持6种地形类型: 高地、悬崖、平原、森林、河流、斜坡")
+    print("• 支持5种地形类型: 高地、悬崖、平原、森林、斜坡")
     print("• 智能边缘匹配系统")
     print("• 实时参数调节 (GUI模式)")
     print("• 导出功能 (JSON + PNG)")

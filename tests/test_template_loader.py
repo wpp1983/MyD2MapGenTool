@@ -37,7 +37,7 @@ class TestTemplateLoader:
         
         # 检查基本模板是否存在
         template_names = [t.name for t in templates]
-        expected_names = ["plain", "forest", "highland", "river", "slope", "cliff"]
+        expected_names = ["plain", "forest", "highland", "slope", "cliff"]
         
         for expected in expected_names:
             assert expected in template_names, f"应该包含 {expected} 模板"
@@ -65,7 +65,7 @@ class TestTemplateLoader:
         colors = loader.get_terrain_colors()
         
         # 检查所有地形都有颜色配置
-        expected_terrains = ["plain", "forest", "highland", "cliff", "river", "slope"]
+        expected_terrains = ["plain", "forest", "highland", "cliff", "slope"]
         
         for terrain in expected_terrains:
             assert terrain in colors, f"{terrain} 应该有颜色配置"

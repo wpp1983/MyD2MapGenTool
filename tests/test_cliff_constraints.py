@@ -152,7 +152,7 @@ class TestMapGeneration:
         
         # 应该加载了所有模板
         template_names = [t.name for t in map_gen.templates]
-        expected_templates = ["plain", "forest", "highland", "river", "slope", "cliff"]
+        expected_templates = ["plain", "forest", "highland", "slope", "cliff"]
         
         for expected in expected_templates:
             assert expected in template_names, f"模板 {expected} 未加载"
