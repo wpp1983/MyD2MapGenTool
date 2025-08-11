@@ -117,7 +117,12 @@ class TemplateLoader:
     
     def get_terrain_colors(self) -> Dict[str, List[float]]:
         """获取地形颜色配置"""
-        return self.config.get("terrain_colors", {})
+        colors = {}
+        terrain_types = self.config.get("terrain_types", {})
+        for terrain_name, terrain_data in terrain_types.items():
+            if isinstance(terrain_data, dict) and "color" in terrain_data:
+                colors[terrain_name] = terrain_data["color"]
+        return colors
     
     def get_debug_config(self) -> Dict[str, Any]:
         """获取调试配置"""
@@ -141,4 +146,9 @@ class TemplateLoader:
     
     def get_generation_rules(self) -> Dict[str, Dict[str, Any]]:
         """获取地形生成规则配置"""
-        return self.config.get("generation_rules", {})
+        rules = {}
+        terrain_types = self.config.get("terrain_types", {})
+        for terrain_name, terrain_data in terrain_types.items():
+            if isinstance(terrain_data, dict) and "generation_rules" in terrain_data:
+                rules[terrain_name] = terrain_data["generation_rules"]
+        return rules

@@ -152,7 +152,10 @@ class TestMapGeneration:
         
         # 应该加载了所有模板
         template_names = [t.name for t in map_gen.templates]
-        expected_templates = ["plain", "forest", "highland", "slope", "cliff"]
+        # 从配置中获取预期的模板名称
+        from template_loader import TemplateLoader
+        loader = TemplateLoader()
+        expected_templates = [template["name"] for template in loader.config["templates"]]
         
         for expected in expected_templates:
             assert expected in template_names, f"模板 {expected} 未加载"

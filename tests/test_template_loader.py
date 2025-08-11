@@ -25,7 +25,11 @@ class TestTemplateLoader:
         assert loader.config is not None, "配置应该被加载"
         assert "templates" in loader.config, "配置应该包含templates字段"
         assert "terrain_types" in loader.config, "配置应该包含terrain_types字段"
-        assert "terrain_colors" in loader.config, "配置应该包含terrain_colors字段"
+        # 检查terrain_types中包含颜色信息
+        terrain_types = loader.config.get("terrain_types", {})
+        for terrain_name, terrain_data in terrain_types.items():
+            if isinstance(terrain_data, dict):
+                assert "color" in terrain_data, f"{terrain_name} 应该包含颜色信息"
     
     def test_template_creation(self):
         """测试模板创建"""
@@ -35,11 +39,11 @@ class TestTemplateLoader:
         # 检查模板数量
         assert len(templates) > 0, "应该创建至少一个模板"
         
-        # 检查基本模板是否存在
+        # 检查模板是否与配置中的模板对应
         template_names = [t.name for t in templates]
-        expected_names = ["plain", "forest", "highland", "slope", "cliff"]
+        config_template_names = [template["name"] for template in loader.config["templates"]]
         
-        for expected in expected_names:
+        for expected in config_template_names:
             assert expected in template_names, f"应该包含 {expected} 模板"
     
     def test_generation_rules_loading(self):
@@ -65,7 +69,7 @@ class TestTemplateLoader:
         colors = loader.get_terrain_colors()
         
         # 检查所有地形都有颜色配置
-        expected_terrains = ["plain", "forest", "highland", "cliff", "slope"]
+        expected_terrains = list(loader.config["terrain_types"].keys())
         
         for terrain in expected_terrains:
             assert terrain in colors, f"{terrain} 应该有颜色配置"
@@ -129,9 +133,15 @@ class TestConfigValidation:
                 pytest.fail(f"配置文件JSON格式无效: {e}")
         
         # 检查必需的顶级字段
-        required_fields = ["templates", "terrain_types", "terrain_colors", "edge_types", "edge_compatibility", "generation_rules"]
+        required_fields = ["templates", "terrain_types", "edge_types", "edge_compatibility"]
         for field in required_fields:
             assert field in config, f"配置文件应该包含 {field} 字段"
+        
+        # 检查terrain_types结构
+        terrain_types = config.get("terrain_types", {})
+        for terrain_name, terrain_data in terrain_types.items():
+            if isinstance(terrain_data, dict):
+                assert "color" in terrain_data, f"{terrain_name} 应该包含颜色信息"
 
 
 if __name__ == "__main__":

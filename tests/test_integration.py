@@ -35,7 +35,11 @@ class TestIntegration:
             for x in range(4):
                 tile = map_gen.tiles[y][x]
                 assert tile is not None, f"位置({x},{y})应该有地块"
-                assert tile.name in ["plain", "forest", "highland", "slope", "cliff"], f"地块类型无效: {tile.name}"
+                # 从配置中获取有效的地形类型
+                from template_loader import TemplateLoader
+                loader = TemplateLoader()
+                valid_terrain_types = list(loader.config["terrain_types"].keys())
+                assert tile.name in valid_terrain_types, f"地块类型无效: {tile.name}"
     
     def test_terrain_cell_grid(self):
         """测试地形网格"""

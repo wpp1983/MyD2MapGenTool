@@ -6,65 +6,44 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from terrain_types import TileTemplate
+from template_loader import TemplateLoader
 import numpy as np
 
 def test_compatibility_from_config():
     """测试从配置文件加载的兼容性规则"""
     
-    # 创建测试模板
-    plain_template = TileTemplate(
-        name="plain_test",
-        size=(1, 1),
-        terrain_pattern=np.array([["plain"]]),
-        north_edge="PLAIN_EDGE",
-        south_edge="PLAIN_EDGE", 
-        east_edge="PLAIN_EDGE",
-        west_edge="PLAIN_EDGE"
-    )
+    # 从配置加载模板
+    loader = TemplateLoader()
+    templates = loader.create_templates(tile_size=1)
     
-    forest_template = TileTemplate(
-        name="forest_test",
-        size=(1, 1),
-        terrain_pattern=np.array([["forest"]]),
-        north_edge="FOREST_EDGE",
-        south_edge="FOREST_EDGE",
-        east_edge="FOREST_EDGE", 
-        west_edge="FOREST_EDGE"
-    )
-    
-    highland_template = TileTemplate(
-        name="highland_test",
-        size=(1, 1),
-        terrain_pattern=np.array([["highland"]]),
-        north_edge="HIGHLAND_EDGE",
-        south_edge="HIGHLAND_EDGE",
-        east_edge="HIGHLAND_EDGE",
-        west_edge="HIGHLAND_EDGE"
-    )
-    
-    cliff_template = TileTemplate(
-        name="cliff_test", 
-        size=(1, 1),
-        terrain_pattern=np.array([["cliff"]]),
-        north_edge="CLIFF_EDGE",
-        south_edge="CLIFF_EDGE",
-        east_edge="CLIFF_EDGE",
-        west_edge="CLIFF_EDGE"
-    )
+    # 创建模板字典以便按名称查找
+    template_dict = {t.name: t for t in templates}
     
     # 测试兼容性
     print("测试兼容性规则:")
     
-    # 应该兼容的组合（根据配置文件）
-    compatible_tests = [
-        (plain_template, forest_template, "应该兼容: plain-forest"),
-        (plain_template, highland_template, "应该兼容: plain-highland"),
-        (highland_template, cliff_template, "应该兼容: highland-cliff"),
-        (forest_template, cliff_template, "应该兼容: forest-cliff"),
-        (plain_template, cliff_template, "应该兼容: plain-cliff"),
-        (plain_template, plain_template, "应该兼容: plain-plain (相同类型)"),
-        (forest_template, forest_template, "应该兼容: forest-forest (相同类型)"),
-    ]
+    # 从配置文件读取兼容性规则来构建测试用例
+    compatibility_rules = loader.get_edge_compatibility()
+    
+    compatible_tests = []
+    # 添加配置中定义的兼容性测试
+    for rule in compatibility_rules:
+        if len(rule) == 2:
+            terrain1, terrain2 = rule
+            if terrain1 in template_dict and terrain2 in template_dict:
+                compatible_tests.append((
+                    template_dict[terrain1], 
+                    template_dict[terrain2], 
+                    f"应该兼容: {terrain1}-{terrain2}"
+                ))
+    
+    # 添加相同类型的兼容性测试
+    for template in templates:
+        compatible_tests.append((
+            template, 
+            template, 
+            f"应该兼容: {template.name}-{template.name} (相同类型)"
+        ))
     
     # 应该不兼容的组合（slope没有在配置中与cliff定义兼容）
     incompatible_tests = [

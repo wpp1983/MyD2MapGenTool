@@ -13,18 +13,6 @@
       "weight": 3.0
     },
     {
-      "name": "forest",
-      "description": "基础森林区块",
-      "terrain_pattern": "forest",
-      "edges": {
-        "north": "forest",
-        "south": "forest",
-        "east": "forest",
-        "west": "forest"
-      },
-      "weight": 2.0
-    },
-    {
       "name": "highland",
       "description": "基础高地区块",
       "terrain_pattern": "highland",
@@ -62,40 +50,42 @@
     }
   ],
   "terrain_types": {
-    "plain": "平原",
-    "forest": "森林",
-    "highland": "高地",
-    "cliff": "悬崖",
-    "slope": "斜坡"
-  },
-  "terrain_colors": {
-    "plain": [0.4, 0.8, 0.2],
-    "forest": [0.1, 0.4, 0.1],
-    "highland": [0.8, 0.6, 0.4],
-    "cliff": [0.5, 0.5, 0.5],
-    "slope": [0.6, 0.3, 0.15]
+    "plain": {
+      "name": "plain",
+      "description": "平原",
+      "color": [0.4, 0.8, 0.2]
+    },
+    "highland": {
+      "name": "highland",
+      "description": "高地",
+      "color": [0.8, 0.6, 0.4]
+    },
+    "cliff": {
+      "name": "cliff",
+      "description": "悬崖",
+      "color": [0.5, 0.5, 0.5],
+      "generation_rules": {
+        "required_neighbors": {
+          "must_have": ["plain", "highland"]
+        }
+      }
+    },
+    "slope": {
+      "name": "slope",
+      "description": "斜坡",
+      "color": [0.6, 0.3, 0.15]
+    }
   },
   "edge_types": {
     "plain": "plain_edge",
-    "forest": "forest_edge",
     "highland": "highland_edge",
     "cliff": "cliff_edge",
     "slope": "slope_edge"
   },
   "edge_compatibility": [
-    ["plain", "forest"],
     ["slope", "plain"],
     ["highland", "slope"],
-    ["forest", "slope"],
     ["plain", "cliff"],
-    ["highland", "cliff"],
-    ["forest", "cliff"]
-  ],
-  "generation_rules": {
-    "cliff": {
-      "required_neighbors": {
-        "must_have": ["plain", "highland"]
-      }
-    }
-  }
+    ["highland", "cliff"]
+  ]
 }
