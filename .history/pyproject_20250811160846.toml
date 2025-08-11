@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "mymapgentool"
+version = "0.1.0"
+description = "基于区块拼接算法的游戏地图生成工具，参考暗黑破坏神2的地图生成机制"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "mymapgentool", from = "."}]
+
+[tool.poetry.dependencies]
+python = "^3.13"
+matplotlib = "^3.5.0"
+numpy = "^1.21.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0.0"
+black = "^23.0.0"
+flake8 = "^6.0.0"
+
+[tool.poetry.scripts]
+demo = "demo:main"
+editor = "interactive_editor:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py37']
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
