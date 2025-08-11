@@ -84,7 +84,6 @@
   },
   "edge_compatibility": [
     ["plain", "forest"],
-    ["highland", "plain"],
     ["slope", "plain"],
     ["highland", "slope"],
     ["forest", "slope"],

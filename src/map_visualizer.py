@@ -99,12 +99,8 @@ class MapVisualizer:
         else:
             self._display_map()
     
-    def _display_map(self):
-        self.ax.clear()
-        
-        terrain_array = self.map_generator.to_array()
-        
-        # 使用统一的颜色定义
+    def _get_color_mapping(self):
+        """获取地形颜色映射，使用配置中的颜色"""
         from terrain_types import TerrainCell, TerrainType
         terrain_color_map = TerrainCell.get_color_map()
         
@@ -114,20 +110,24 @@ class MapVisualizer:
         
         color_map = {}
         for i, terrain_str in enumerate(terrain_types):
-            # 直接使用字符串而不是转换后的类型
-            if terrain_str in ['plain', 'forest', 'highland', 'cliff', 'slope']:
-                # 使用预定义的颜色
-                color_defaults = {
-                    "plain": [0.4, 0.8, 0.2],     # 平原 - 浅绿色
-                    "forest": [0.1, 0.4, 0.1],    # 森林 - 深绿色
-                    "highland": [0.8, 0.6, 0.4],  # 高地 - 棕色
-                    "cliff": [0.5, 0.5, 0.5],     # 悬崖 - 灰色
-                    "slope": [0.6, 0.3, 0.15]     # 斜坡 - 褐色
-                }
-                color_map[i] = color_defaults.get(terrain_str, [0.5, 0.5, 0.5])
-            else:
-                # 默认颜色（灰色）
+            try:
+                terrain_type = TerrainType.from_string(terrain_str)
+                # 从配置加载的颜色映射中获取颜色
+                color = terrain_color_map.get(terrain_type, [0.5, 0.5, 0.5])
+                color_map[i] = color
+            except (ValueError, KeyError):
+                # 如果地形类型不存在或没有配置颜色，使用默认灰色
                 color_map[i] = [0.5, 0.5, 0.5]
+        
+        return color_map
+    
+    def _display_map(self):
+        self.ax.clear()
+        
+        terrain_array = self.map_generator.to_array()
+        
+        # 使用统一的颜色映射
+        color_map = self._get_color_mapping()
         
         colored_map = np.zeros((terrain_array.shape[0], terrain_array.shape[1], 3))
         for terrain_value, color in color_map.items():
@@ -139,6 +139,10 @@ class MapVisualizer:
         self._draw_tile_grid()
         
         # 动态生成图例
+        from terrain_types import TerrainType
+        TerrainType.initialize_from_config()
+        terrain_types = TerrainType.get_all_types()
+        
         legend_elements = []
         for i, terrain_str in enumerate(terrain_types):
             if i in color_map:
@@ -203,7 +207,7 @@ class MapVisualizer:
             row = []
             for x in range(self.map_generator.width):
                 cell = self.map_generator.get_cell(x, y)
-                row.append(cell.terrain_type.value if cell else 'plain')
+                row.append(str(cell.terrain_type) if cell else 'plain')
             export_data['terrain_data'].append(row)
         
         filename = os.path.join(output_dir, f'map_seed_{self.current_seed}.json')
@@ -220,30 +224,9 @@ class MapVisualizer:
             ax = plt.gca()
             
         terrain_array = self.map_generator.to_array()
-        # 使用统一的颜色定义
-        from terrain_types import TerrainCell, TerrainType
-        terrain_color_map = TerrainCell.get_color_map()
         
-        # 动态创建颜色映射
-        TerrainType.initialize_from_config()
-        terrain_types = TerrainType.get_all_types()
-        
-        color_map = {}
-        for i, terrain_str in enumerate(terrain_types):
-            # 直接使用字符串而不是转换后的类型
-            if terrain_str in ['plain', 'forest', 'highland', 'cliff', 'slope']:
-                # 使用预定义的颜色
-                color_defaults = {
-                    "plain": [0.4, 0.8, 0.2],     # 平原 - 浅绿色
-                    "forest": [0.1, 0.4, 0.1],    # 森林 - 深绿色
-                    "highland": [0.8, 0.6, 0.4],  # 高地 - 棕色
-                    "cliff": [0.5, 0.5, 0.5],     # 悬崖 - 灰色
-                    "slope": [0.6, 0.3, 0.15]     # 斜坡 - 褐色
-                }
-                color_map[i] = color_defaults.get(terrain_str, [0.5, 0.5, 0.5])
-            else:
-                # 默认颜色（灰色）
-                color_map[i] = [0.5, 0.5, 0.5]
+        # 使用统一的颜色映射
+        color_map = self._get_color_mapping()
         
         colored_map = np.zeros((terrain_array.shape[0], terrain_array.shape[1], 3))
         for terrain_value, color in color_map.items():

@@ -287,28 +287,16 @@ class TerrainCell:
     def get_color_map():
         """获取统一的地形颜色映射"""
         if TerrainCell._color_map is None:
-            # 如果没有从配置加载，使用默认颜色
-            TerrainType.initialize_from_config()
-            default_colors = {}
-            
+            # 如果没有从配置加载，尝试从配置文件加载颜色
             try:
-                terrain_types = TerrainType.get_all_types()
-                color_defaults = {
-                    "highland": [0.8, 0.6, 0.4],  # 高地 - 棕色
-                    "cliff": [0.5, 0.5, 0.5],     # 悬崖 - 灰色
-                    "plain": [0.4, 0.8, 0.2],     # 平原 - 浅绿色
-                    "forest": [0.1, 0.4, 0.1],    # 森林 - 深绿色
-                    "slope": [0.6, 0.3, 0.15]     # 斜坡 - 褐色
-                }
-                
-                for terrain_str in terrain_types:
-                    terrain_type = TerrainType.from_string(terrain_str)
-                    default_colors[terrain_type] = color_defaults.get(terrain_str, [0.5, 0.5, 0.5])
-                
-                return default_colors
-            except Exception:
-                # 如果出错，返回一个基本的映射
-                return {}
+                from template_loader import TemplateLoader
+                loader = TemplateLoader()
+                color_config = loader.get_terrain_colors()
+                TerrainCell.set_color_map(color_config)
+            except Exception as e:
+                print(f"警告: 无法从配置文件加载颜色: {e}")
+                # 如果配置加载失败，返回空映射，使用默认颜色
+                TerrainCell._color_map = {}
         return TerrainCell._color_map
     
     def get_color(self) -> Tuple[float, float, float]:
