@@ -101,9 +101,17 @@
     ["plain", "forest"],
     ["plain", "river"],
     ["plain", "slope"],
+    ["plain", "cliff"],
     ["highland", "slope"],
     ["highland", "cliff"],
     ["forest", "slope"],
     ["forest", "cliff"]
-  ]
+  ],
+  "generation_rules": {
+    "cliff": {
+      "required_neighbors": {
+        "must_have": ["plain", "highland"]
+      }
+    }
+  }
 }

@@ -171,3 +171,7 @@ class TemplateLoader:
                 "edges": template_config["edges"]
             })
         return info
+    
+    def get_generation_rules(self) -> Dict[str, Dict[str, Any]]:
+        """获取地形生成规则配置"""
+        return self.config.get("generation_rules", {})
