@@ -19,19 +19,26 @@ def run_all_tests():
 def run_specific_test(test_file):
     """运行特定测试文件"""
     print(f"🧪 运行测试文件: {test_file}")
-    result = subprocess.run(["poetry", "run", "pytest", f"tests/{test_file}"], cwd=os.getcwd())
+    result = subprocess.run(
+        ["poetry", "run", "pytest", f"tests/{test_file}"], cwd=os.getcwd()
+    )
     return result.returncode
 
 
 def run_with_coverage():
     """运行测试并生成覆盖率报告"""
     print("🧪 运行测试并生成覆盖率报告...")
-    result = subprocess.run([
-        "poetry", "run", "pytest", 
-        "--cov=src", 
-        "--cov-report=html", 
-        "--cov-report=term"
-    ], cwd=os.getcwd())
+    result = subprocess.run(
+        [
+            "poetry",
+            "run",
+            "pytest",
+            "--cov=src",
+            "--cov-report=html",
+            "--cov-report=term",
+        ],
+        cwd=os.getcwd(),
+    )
     return result.returncode
 
 
@@ -51,9 +58,9 @@ def main():
         print("  python run_tests.py coverage      # 运行测试并生成覆盖率")
         print("  python run_tests.py verbose       # 详细模式")
         sys.exit(1)
-    
+
     command = sys.argv[1]
-    
+
     if command == "all":
         exit_code = run_all_tests()
     elif command == "coverage":
@@ -65,7 +72,7 @@ def main():
     else:
         print(f"未知命令: {command}")
         sys.exit(1)
-    
+
     sys.exit(exit_code)
 
 

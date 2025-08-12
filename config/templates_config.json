@@ -1,91 +1,35 @@
 {
-  "templates": [
-    {
-      "name": "plain",
-      "description": "基础平原区块",
-      "terrain_pattern": "plain",
-      "edges": {
-        "north": "plain",
-        "south": "plain",
-        "east": "plain",
-        "west": "plain"
-      },
-      "weight": 3.0
-    },
-    {
-      "name": "highland",
-      "description": "基础高地区块",
-      "terrain_pattern": "highland",
-      "edges": {
-        "north": "highland",
-        "south": "highland",
-        "east": "highland",
-        "west": "highland"
-      },
-      "weight": 1.5
-    },
-    {
-      "name": "slope",
-      "description": "斜坡区块",
-      "terrain_pattern": "slope",
-      "edges": {
-        "north": "slope",
-        "south": "slope",
-        "east": "slope",
-        "west": "slope"
-      },
-      "weight": 1.0
-    },
-    {
-      "name": "cliff",
-      "description": "悬崖区块",
-      "terrain_pattern": "cliff",
-      "edges": {
-        "north": "cliff",
-        "south": "cliff",
-        "east": "cliff",
-        "west": "cliff"
-      },
-      "weight": 0.5
-    }
-  ],
-  "terrain_types": {
-    "plain": {
-      "name": "plain",
-      "description": "平原",
-      "color": [0.4, 0.8, 0.2]
-    },
-    "highland": {
-      "name": "highland",
-      "description": "高地",
-      "color": [0.8, 0.6, 0.4]
-    },
-    "cliff": {
-      "name": "cliff",
-      "description": "悬崖",
-      "color": [0.5, 0.5, 0.5],
-      "generation_rules": {
-        "required_neighbors": {
-          "must_have": ["plain", "highland"]
+  "metadata": {
+    "version": "1.0",
+    "description": "基础地形配置系统",
+    "current_phase": 1,
+    "total_phases": 1
+  },
+  "phases": {
+    "1": {
+      "name": "基础地形阶段",
+      "description": "包含基础的平原和高地地形，实现简单的地形多样性",
+      "cell_types": {
+        "plain": {
+          "name": "plain",
+          "description": "平原",
+          "color": [0.4, 0.8, 0.2],
+          "weight": 3.0
+        },
+        "highland": {
+          "name": "highland",
+          "description": "高地",
+          "color": [0.8, 0.6, 0.4],
+          "weight": 1.5
         }
-      }
-    },
-    "slope": {
-      "name": "slope",
-      "description": "斜坡",
-      "color": [0.6, 0.3, 0.15]
+      },
+      "edge_types": {
+        "plain": "plain_edge",
+        "highland": "highland_edge"
+      },
+      "edge_compatibility": [
+        ["plain", "highland"]
+      ]
     }
-  },
-  "edge_types": {
-    "plain": "plain_edge",
-    "highland": "highland_edge",
-    "cliff": "cliff_edge",
-    "slope": "slope_edge"
-  },
-  "edge_compatibility": [
-    ["slope", "plain"],
-    ["highland", "slope"],
-    ["plain", "cliff"],
-    ["highland", "cliff"]
-  ]
+  }
 }

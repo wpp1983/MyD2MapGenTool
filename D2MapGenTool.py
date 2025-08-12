@@ -6,40 +6,44 @@
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 from app_config import AppConfig
+
 
 def setup_matplotlib_backend(config: AppConfig):
     """根据配置设置matplotlib后端"""
     import matplotlib
-    
+
     # 检查是否启用GUI
     if not config.is_gui_enabled():
-        matplotlib.use('Agg')
+        matplotlib.use("Agg")
         if config.is_verbose_output():
             print("🔧 配置禁用GUI，使用Agg后端")
         return False
-    
+
     # 自动检测WSL环境
-    is_wsl = 'microsoft' in os.uname().release.lower() if hasattr(os, 'uname') else False
-    
+    is_wsl = (
+        "microsoft" in os.uname().release.lower() if hasattr(os, "uname") else False
+    )
+
     if is_wsl and config.is_verbose_output():
         print("🔍 检测到WSL环境，配置matplotlib后端...")
-    
+
     # 检查DISPLAY环境变量
-    has_display = 'DISPLAY' in os.environ and os.environ['DISPLAY']
-    
+    has_display = "DISPLAY" in os.environ and os.environ["DISPLAY"]
+
     if not has_display and config.should_auto_set_display():
         display_value = config.get_default_display()
-        os.environ['DISPLAY'] = display_value
+        os.environ["DISPLAY"] = display_value
         if config.is_verbose_output():
             print(f"🔧 自动设置 DISPLAY={display_value}")
         has_display = True
-    
+
     # 根据环境选择后端
     if has_display:
         try:
-            matplotlib.use('TkAgg')
+            matplotlib.use("TkAgg")
             if config.is_verbose_output():
                 print(f"✅ 已设置matplotlib后端: {matplotlib.get_backend()}")
             return True
@@ -47,19 +51,20 @@ def setup_matplotlib_backend(config: AppConfig):
             if config.is_verbose_output():
                 print(f"❌ 无法设置TkAgg后端: {e}")
                 print("🔧 切换到Agg后端 (无GUI模式)")
-            matplotlib.use('Agg')
+            matplotlib.use("Agg")
             return False
     else:
-        matplotlib.use('Agg')
+        matplotlib.use("Agg")
         if config.is_verbose_output():
             print("🔧 无DISPLAY环境变量，使用Agg后端 (无GUI模式)")
         return False
+
 
 def print_banner(config: AppConfig):
     """打印程序横幅"""
     if not config.is_verbose_output():
         return
-        
+
     print("==================================================")
     print("游戏地图制作工具 - 暗黑2风格")
     print("==================================================")
@@ -73,34 +78,42 @@ def print_banner(config: AppConfig):
     print("• 简化配置")
     print()
 
+
 def get_user_choice(config: AppConfig) -> str:
     """获取用户运行模式选择"""
     if not config.should_show_user_choice():
-        return '1'  # 默认GUI模式
-    
+        return "1"  # 默认GUI模式
+
     print("选择运行模式:")
     print("1. GUI界面模式 (交互式)")
     print("2. 无GUI模式 (批量生成)")
     print()
-    
+
     try:
         choice = input("请选择 (1/2) [默认: 1]: ").strip()
-        return choice if choice in ['1', '2'] else '1'
+        return choice if choice in ["1", "2"] else "1"
     except (KeyboardInterrupt, EOFError):
         print("\n使用默认GUI模式...")
-        return '1'
+        return "1"
+
 
 def run_gui_mode(config: AppConfig):
     """运行GUI模式"""
-    from map_visualizer import MapVisualizer
-    
+    from src.map_visualizer import MapVisualizer
+
     tile_width, tile_height = config.get_default_map_size()
-    
+    phase = config.get_phase()
+
     if config.is_verbose_output():
         print("启动GUI界面...")
-    
+        if phase is not None:
+            print(f"使用地形阶段: {phase}")
+
     try:
-        visualizer = MapVisualizer(tile_width=tile_width, tile_height=tile_height)
+        # 转换为像素尺寸（逐格子系统）
+        width = tile_width * 8  
+        height = tile_height * 8
+        visualizer = MapVisualizer(width=width, height=height, phase=phase)
         visualizer.show()
     except Exception as e:
         if config.is_verbose_output():
@@ -109,7 +122,7 @@ def run_gui_mode(config: AppConfig):
             print("- X11服务器未运行")
             print("- WSL的X11转发配置有问题")
             print("- 缺少必要的GUI库")
-        
+
         if config.should_fallback_to_headless():
             if config.is_verbose_output():
                 print("🔄 自动切换到无GUI模式...")
@@ -119,43 +132,73 @@ def run_gui_mode(config: AppConfig):
                 print("程序退出")
             sys.exit(1)
 
+
 def run_headless_mode(config: AppConfig):
     """运行无GUI模式"""
-    from map_visualizer import MapVisualizer
-    
+    from src.map_visualizer import MapVisualizer
+
     if config.is_verbose_output():
         print()
         print("=== 无GUI模式 ===")
-    
+
     seeds = config.get_headless_batch_seeds()
     tile_width, tile_height = config.get_default_map_size()
-    
+    output_dir = config.get_output_directory()
+    phase = config.get_phase()
+
+    # 创建输出目录
+    if output_dir != "." and not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+        if config.is_verbose_output():
+            print(f"✅ 创建输出目录: {output_dir}")
+
     if config.is_verbose_output():
         print(f"将生成{len(seeds)}个不同种子的地图并自动保存")
+        print(f"地图尺寸: {tile_width}x{tile_height} 瓦片")
+        if phase is not None:
+            print(f"地形阶段: {phase}")
+        if output_dir != ".":
+            print(f"输出目录: {output_dir}")
         print()
-    
+
     for i, seed in enumerate(seeds, 1):
         if config.is_verbose_output():
             print(f"[{i}/{len(seeds)}] 生成地图 (种子: {seed})...")
-        
-        visualizer = MapVisualizer(tile_width=tile_width, tile_height=tile_height, headless=True)
+
+        # 转换为像素尺寸（逐格子系统）
+        width = tile_width * 8
+        height = tile_height * 8
+        visualizer = MapVisualizer(
+            width=width,
+            height=height,
+            headless=True,
+            output_dir=output_dir,
+            phase=phase,
+        )
         visualizer.current_seed = seed
         visualizer._generate_and_display()
-        
+
         if config.should_auto_export_headless():
             visualizer._export_map()
-        
+
         if config.is_verbose_output():
             print()
-    
+
     if config.is_verbose_output():
         print("✅ 所有地图已生成完成!")
-        print("文件保存在当前目录:")
-        print("  • map_seed_*.json (地图数据)")
-        print("  • map_seed_*.png (地图图像)")
-        
+        # 无GUI模式默认保存到output目录
+        if output_dir == ".":
+            actual_output_path = "output目录"
+        else:
+            actual_output_path = output_dir
+        print(f"文件保存在{actual_output_path}:")
+        print("  • YYYYMMDD_HHMMSS_seed_*.json (地图数据)")
+        print("  • YYYYMMDD_HHMMSS_seed_*.png (地图图像)")
+
         # 显示WSL配置提示
-        is_wsl = 'microsoft' in os.uname().release.lower() if hasattr(os, 'uname') else False
+        is_wsl = (
+            "microsoft" in os.uname().release.lower() if hasattr(os, "uname") else False
+        )
         if is_wsl:
             print()
             print("WSL GUI配置提示:")
@@ -168,17 +211,22 @@ def run_headless_mode(config: AppConfig):
             print("   export DISPLAY=:0")
             print("4. 或修改config.json设置 'ui.enable_gui': false")
 
+
 def main():
     """主函数"""
-    # 加载配置
-    config = AppConfig()
-    
+    # 解析命令行参数
+    parser = AppConfig.create_argument_parser()
+    args = parser.parse_args()
+
+    # 加载配置，传入命令行参数
+    config = AppConfig(args=args)
+
     # 打印横幅
     print_banner(config)
-    
+
     # 设置matplotlib后端
     gui_available = setup_matplotlib_backend(config)
-    
+
     # 决定运行模式
     if not config.is_gui_enabled():
         if config.is_verbose_output():
@@ -191,13 +239,14 @@ def main():
     else:
         # GUI可用，询问用户选择
         choice = get_user_choice(config)
-        
-        if choice == '2':
+
+        if choice == "2":
             if config.is_verbose_output():
                 print("用户选择无GUI模式...")
             run_headless_mode(config)
         else:
             run_gui_mode(config)
+
 
 if __name__ == "__main__":
     main()

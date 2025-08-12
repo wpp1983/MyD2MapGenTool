@@ -21,20 +21,60 @@ poetry shell
 ```
 
 ### Running the Application
+
+#### GUI Mode (Default)
 ```bash
 # Main unified launcher (recommended)
 poetry run python D2MapGenTool.py
 
 # Using poetry scripts
 poetry run D2MapGenTool    # Main launcher
-poetry run editor          # Interactive editor
-
-# Individual components (advanced usage)
-poetry run python src/map_visualizer.py
-poetry run python src/interactive_editor.py
 
 # Or in activated shell
 python D2MapGenTool.py
+```
+
+#### Command Line Mode (Headless)
+```bash
+# Basic headless mode - generates default maps
+poetry run python D2MapGenTool.py --headless
+
+# Generate single map with specific seed
+poetry run python D2MapGenTool.py --headless --seed 42
+
+# Batch generate multiple maps with random seeds
+poetry run python D2MapGenTool.py --headless --batch 5
+
+# Custom map size (width x height in tiles)
+poetry run python D2MapGenTool.py --headless --size 16x12
+
+# Custom output directory
+poetry run python D2MapGenTool.py --headless --output ./maps
+
+# Quiet mode (minimal output for automation)
+poetry run python D2MapGenTool.py --headless --quiet
+
+# Verbose mode (detailed output for debugging)
+poetry run python D2MapGenTool.py --headless --verbose
+
+# Combined example: Generate 3 maps with custom size to specific directory
+poetry run python D2MapGenTool.py --headless --batch 3 --size 20x15 --output ./generated_maps
+```
+
+#### Command Line Options
+- `--headless, --no-gui`: Run in headless mode (no GUI)
+- `--seed SEED`: Specify map generation seed (integer)
+- `--batch N`: Generate N maps with random seeds (headless mode only)
+- `--size WxH`: Map dimensions in tiles, format: width×height (e.g., 16x12)
+- `--output DIR, -o DIR`: Output directory for exported files
+- `--verbose, -v`: Enable detailed output for debugging
+- `--quiet, -q`: Minimize output for automation/scripting
+- `--help, -h`: Show help message with all options
+
+#### Advanced Usage
+```bash
+# Individual components (advanced usage)
+poetry run python src/map_visualizer.py
 ```
 
 ### Development Tools
@@ -58,7 +98,7 @@ poetry run pytest -m "not slow"     # Skip slow tests
 - **numpy^1.21.0** - Array operations and numerical computing
 - **Development dependencies**: pytest (testing), black (formatting), flake8 (linting)
 - **Python requirement**: ^3.8.1
-- **Poetry scripts**: D2MapGenTool (main), editor (interactive editor)
+- **Poetry scripts**: D2MapGenTool (main)
 
 ## Architecture Overview
 
@@ -74,7 +114,6 @@ MyMapGenTool/
 │   ├── template_loader.py   # Configuration-based template loader
 │   ├── map_generator.py     # Core map generation engine
 │   ├── map_visualizer.py    # Visualization and GUI
-│   ├── interactive_editor.py # Advanced editing capabilities
 │   └── app_config.py        # Application configuration management
 ├── tests/                   # Comprehensive test suite (32 tests)
 │   ├── test_cliff_constraints.py
@@ -113,11 +152,6 @@ MyMapGenTool/
 - Headless mode for batch generation
 - Automatic X11 configuration for WSL environments
 
-**src/interactive_editor.py** - Advanced editing:
-- `InteractiveMapEditor` class: Extends MapVisualizer with editing capabilities  
-- Click-to-paint terrain modification
-- Custom template saving from edited regions
-- Edit history tracking with visual indicators
 
 **src/app_config.py** - Runtime configuration:
 - `AppConfig` class: Manages runtime behavior and settings
@@ -245,15 +279,6 @@ The system uses a configuration-driven two-level hierarchy:
 }
 ```
 
-**Custom Template Format**:
-```json
-{
-  "name": "custom_template_N",
-  "size": [width, height],
-  "pattern": [...],      // 2D terrain pattern
-  "edited_cells": [...]  // List of modified coordinates
-}
-```
 
 ## Key Algorithms
 

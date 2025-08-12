@@ -18,7 +18,6 @@ flake8 = "^6.0.0"
 
 [tool.poetry.scripts]
 D2MapGenTool = "D2MapGenTool:main"
-editor = "interactive_editor:main"
 
 [build-system]
 requires = ["poetry-core"]
