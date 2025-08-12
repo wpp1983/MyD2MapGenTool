@@ -155,3 +155,14 @@ class TemplateLoader:
         """获取所有可用阶段"""
         phases = self.config.get("phases", {})
         return [int(phase) for phase in phases.keys()]
+    
+    def get_region_generation_config(self) -> Dict[str, Any]:
+        """获取区域生成配置"""
+        return self.config.get("region_generation", {
+            "target_region_count": 7,
+            "min_region_distance": 0.15,
+            "growth_strength": 0.95,
+            "growth_decay": 0.95,
+            "growth_threshold": 0.05,
+            "max_placement_attempts": 100
+        })

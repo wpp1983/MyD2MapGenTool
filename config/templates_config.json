@@ -5,6 +5,14 @@
     "current_phase": 1,
     "total_phases": 1
   },
+  "region_generation": {
+    "target_region_count": 10,
+    "min_region_distance": 0.15,
+    "growth_strength": 0.95,
+    "growth_decay": 0.95,
+    "growth_threshold": 0.05,
+    "max_placement_attempts": 100
+  },
   "phases": {
     "1": {
       "name": "基础地形阶段",

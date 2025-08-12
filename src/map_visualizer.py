@@ -73,8 +73,12 @@ class MapVisualizer:
         self.output_dir = output_dir
 
         if not self.headless:
-            self.fig, self.ax = plt.subplots(figsize=(12, 8))
-            plt.subplots_adjust(bottom=0.25)
+            self.fig = plt.figure(figsize=(16, 8))
+            # 创建网格布局：左侧地图，右侧统计信息
+            gs = self.fig.add_gridspec(1, 2, width_ratios=[3, 1], hspace=0.3)
+            self.ax = self.fig.add_subplot(gs[0, 0])
+            self.stats_ax = self.fig.add_subplot(gs[0, 1])
+            plt.subplots_adjust(bottom=0.25, right=0.95)
             self._setup_ui()
 
         self._generate_and_display()
@@ -110,6 +114,9 @@ class MapVisualizer:
             for terrain, count in distribution.items():
                 percentage = (count / total) * 100
                 print(f"  {terrain}: {count} ({percentage:.1f}%)")
+            
+            # 显示区域分析
+            self.map_generator.print_region_analysis()
         else:
             self._display_map()
 
@@ -138,6 +145,7 @@ class MapVisualizer:
 
     def _display_map(self):
         self.ax.clear()
+        self.stats_ax.clear()
 
         terrain_array = self.map_generator.to_array()
 
@@ -165,14 +173,119 @@ class MapVisualizer:
                 legend_elements.append(patches.Patch(color=color_map[i], label=label))
 
         self.ax.legend(
-            handles=legend_elements, loc="upper right", bbox_to_anchor=(1.15, 1)
+            handles=legend_elements, loc="upper right", bbox_to_anchor=(1.02, 1)
         )
 
         self.ax.set_title(f"Generated Map (Seed: {self.current_seed})")
         self.ax.set_xlabel("X Coordinate")
         self.ax.set_ylabel("Y Coordinate")
 
+        # 显示区域统计信息
+        self._display_region_stats()
+
         self.fig.canvas.draw()
+
+    def _display_region_stats(self):
+        """在右侧面板显示区域统计信息"""
+        self.stats_ax.clear()
+        self.stats_ax.axis('off')  # 隐藏坐标轴
+        
+        # 获取区域分析数据
+        regions = self.map_generator.analyze_regions()
+        total_regions = sum(stats['region_count'] for stats in regions.values())
+        
+        # 获取地形描述
+        terrain_descriptions = self.map_generator._get_terrain_descriptions()
+        
+        # 计算连贯性指标
+        total_cells = sum(stats['total_cells'] for stats in regions.values())
+        connectivity_score = (total_cells / total_regions) if total_regions > 0 else 0
+        
+        # 构建显示文本
+        y_pos = 0.95
+        y_step = 0.05
+        
+        # 标题
+        self.stats_ax.text(0.05, y_pos, "Region Statistics", fontsize=14, fontweight='bold', 
+                          transform=self.stats_ax.transAxes)
+        y_pos -= y_step * 1.5
+        
+        # 总体信息
+        self.stats_ax.text(0.05, y_pos, f"Total Regions: {total_regions}", fontsize=11,
+                          transform=self.stats_ax.transAxes)
+        y_pos -= y_step
+        
+        self.stats_ax.text(0.05, y_pos, f"Map Size: {self.width}×{self.height}", fontsize=11,
+                          transform=self.stats_ax.transAxes)
+        y_pos -= y_step
+        
+        self.stats_ax.text(0.05, y_pos, f"Coherence: {connectivity_score:.1f}", fontsize=11,
+                          transform=self.stats_ax.transAxes)
+        y_pos -= y_step * 1.5
+        
+        # 连贯性评价
+        if connectivity_score >= 50:
+            connectivity_text = "Excellent"
+            color = 'green'
+        elif connectivity_score >= 25:
+            connectivity_text = "Good"
+            color = 'orange'
+        else:
+            connectivity_text = "Poor"
+            color = 'red'
+            
+        self.stats_ax.text(0.05, y_pos, connectivity_text, fontsize=10, color=color,
+                          transform=self.stats_ax.transAxes)
+        y_pos -= y_step * 2
+        
+        # 各地形详细信息
+        for terrain, stats in regions.items():
+            if stats['region_count'] > 0:
+                description = terrain_descriptions.get(terrain, terrain)
+                
+                # 地形名称
+                self.stats_ax.text(0.05, y_pos, f"{terrain.capitalize()}", 
+                                  fontsize=12, fontweight='bold',
+                                  transform=self.stats_ax.transAxes)
+                y_pos -= y_step
+                
+                # 区域数量
+                self.stats_ax.text(0.1, y_pos, f"Regions: {stats['region_count']}", 
+                                  fontsize=10, transform=self.stats_ax.transAxes)
+                y_pos -= y_step * 0.8
+                
+                # 总格子数和百分比
+                percentage = (stats['total_cells'] / total_cells) * 100
+                self.stats_ax.text(0.1, y_pos, f"Coverage: {percentage:.1f}% ({stats['total_cells']})", 
+                                  fontsize=10, transform=self.stats_ax.transAxes)
+                y_pos -= y_step * 0.8
+                
+                # 最大区域
+                self.stats_ax.text(0.1, y_pos, f"Largest: {stats['largest_region']} cells", 
+                                  fontsize=10, transform=self.stats_ax.transAxes)
+                y_pos -= y_step * 0.8
+                
+                # 平均大小
+                self.stats_ax.text(0.1, y_pos, f"Average: {stats['average_region_size']:.1f}", 
+                                  fontsize=10, transform=self.stats_ax.transAxes)
+                y_pos -= y_step * 0.8
+                
+                # 区域分布
+                sizes = stats['region_sizes']
+                if len(sizes) > 0:
+                    small = sum(1 for s in sizes if s < 20)
+                    medium = sum(1 for s in sizes if 20 <= s < 100)
+                    large = sum(1 for s in sizes if s >= 100)
+                    
+                    self.stats_ax.text(0.1, y_pos, f"S:{small} M:{medium} L:{large}", 
+                                      fontsize=9, color='gray',
+                                      transform=self.stats_ax.transAxes)
+                    y_pos -= y_step * 1.5
+                else:
+                    y_pos -= y_step
+                    
+        # 设置统计面板标题
+        self.stats_ax.set_title("Region Analysis", fontsize=12, pad=20)
 
 
     def _on_generate_clicked(self, event):
